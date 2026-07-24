@@ -72,7 +72,7 @@ document.getElementById('startBtn').onclick=function(){
 function showQ(i){
   if(i>=qs.length){runAnalysis();return;}
   var q=qs[i];
-  var h='<div class=cd.a><h2>第'+(i+1)+'/'+qs.length+'步</h2><div class=st>'+q.q+'</div><div class=ops>';
+  var h='<div class="cd a"><h2>第'+(i+1)+'/'+qs.length+'步</h2><div class=st>'+q.q+'</div><div class=ops>';
   for(var j=0;j<q.os.length;j++){
     var c=q.multi?'cb':'rb';
     h+='<div class=op><div class='+c+'></div><span>'+q.os[j].l+'</span></div>';
