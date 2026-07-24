@@ -1,1 +1,695 @@
-<!DOCTYPE html><html lang=zh-CN><head><meta charset=UTF-8><meta name=viewport content=width=device-width,initial-scale=1.0><title>痘痘皮肤自测诊断</title><link rel=stylesheet href=style.css></head><body><div class=c><div class=hd><h1>痘痘皮肤自测诊断</h1><p>6步找到你的痘痘类型与解决方案</p></div><div class=pb><div class=pb-bar id=pb></div></div><div class=pbl id=pbl>开始测试</div><div class="cd a" id=intro><div class=in><h2>开始自测</h2><p>回答几个简单问题,系统自动分析你的痘痘类型并给出分阶段护肤方案</p><button class=btn-p id=startBtn>开始答题</button></div></div><div id=stages></div><div class=int id=intercept></div><div class=ld id=loading><div class=sp></div><p>正在分析...</p><div class=ls id=lsteps>分析中</div></div><div id=result></div></div><script src=app.js></script></body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>痘痘皮肤自测诊断 - 完整版</title>
+<style>
+:root{--g:#2d6a4f;--gl:#40916c;--r:#ff6b6b;--w:#e67e22;--d:#c0392b;--bg:#fafafa;--text:#262626;--muted:#737373;--border:#d4d4d4}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:-apple-system,PingFang SC,Noto Sans SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+.c{width:100%;max-width:640px;padding:20px;margin:0 auto;min-height:100vh}
+.hd{text-align:center;padding:24px 0 12px}.hd h1{font-size:22px}.hd p{font-size:14px;color:var(--muted)}
+.pb{height:6px;background:#e5e5e5;border-radius:3px;margin:0 0 16px;overflow:hidden}
+.pb-bar{height:100%;background:linear-gradient(90deg,var(--g),var(--gl));border-radius:3px;transition:width .5s;width:0%}
+.pbl{font-size:12px;color:var(--muted);text-align:right;margin-bottom:8px}
+.cd{background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;display:none;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.cd.a{display:block;animation:fade .35s}@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.cd h2{font-size:18px;margin-bottom:4px}.st{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+/* Intercept banners */
+.int{display:none;border-radius:12px;padding:16px;margin-bottom:16px}
+.int.s{display:block;animation:fade .35s}
+.int.d{background:#fde8e8;border:1px solid var(--d)}.int.d h3{color:var(--d)}.int.d p{color:#404040}
+.int.w{background:#fef3e2;border:1px solid var(--w)}.int.w h3{color:var(--w)}.int.w p{color:#404040}
+.int.g{background:#e8f5e9;border:1px solid var(--g)}.int.g h3{color:var(--g)}.int.g p{color:#404040}
+/* Questions */
+.q{margin-bottom:16px}.ql{font-size:14px;font-weight:600;margin-bottom:8px;line-height:1.5}.qsub{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4}
+.ops{display:flex;flex-direction:column;gap:8px}
+.op{display:flex;align-items:center;padding:12px 16px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:14px;line-height:1.4;gap:10px;user-select:none;transition:all .15s}
+.op:hover{border-color:var(--gl);background:#e8f5e9}.op.s{border-color:var(--g);background:#e8f5e9;font-weight:600}
+.op .rb{width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.op.s .rb{border-color:var(--g)}.op.s .rb::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--g);display:block}
+.op .cb{width:20px;height:20px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.op.s .cb{background:var(--g);border-color:var(--g)}.op.s .cb::after{content:"\\2713";color:#fff;font-size:12px;font-weight:700}
+.bg{display:flex;gap:12px;margin-top:20px}
+.btn{flex:1;padding:14px 24px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-p{background:var(--g);color:#fff}.btn-p:hover{background:var(--gl)}
+.btn-o{background:transparent;color:#525252;border:1.5px solid var(--border)}.btn-o:hover{border-color:var(--gl);background:#f5f5f5}
+.in{text-align:center;padding:40px 0}.in h2{font-size:24px;margin-bottom:8px}.in p{font-size:14px;color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto 24px}
+.dc{font-size:11px;color:#a3a3a3;margin-top:16px}
+/* Loading */
+.ld{display:none;text-align:center;padding:60px 0;flex-direction:column;align-items:center}.ld.a{display:flex}
+.ld .sp{width:40px;height:40px;border:4px solid #e5e5e5;border-top-color:var(--g);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}.ld p{font-size:14px;color:var(--muted)}.ld .ls{font-size:12px;color:#a3a3a3;margin-top:8px}
+/* Results */
+.rsum{background:linear-gradient(135deg,var(--g),#1b4332);color:#fff;border-radius:12px;padding:20px;margin-bottom:16px}
+.rsum h2{color:#fff;font-size:18px;margin-bottom:8px}.rsum .rdesc{font-size:14px;line-height:1.6;opacity:.9;margin-top:8px}
+.rsum .ct{display:inline-block;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:12px;font-size:12px;margin:3px 3px 3px 0}.rsum .ct.p{background:rgba(255,255,255,.25)}
+.pc{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-bottom:12px}
+.pc .pl{font-size:11px;font-weight:600;color:var(--g);letter-spacing:1px;margin-bottom:2px}.pc .pt{font-size:15px;font-weight:700;margin-bottom:8px}
+.pd{background:#e8f5e9;border-radius:6px;padding:8px 12px;margin:6px 0;font-size:13px;color:#2d6a4f}
+.px{background:#ffe8e8;border-radius:6px;padding:8px 12px;margin:6px 0;font-size:13px;color:var(--d)}
+.pw{background:#fef3e2;border-radius:6px;padding:8px 12px;margin:6px 0;font-size:13px;color:var(--w)}
+.ptl{margin-bottom:20px}.ptl .ttl{font-size:16px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e8f5e9}
+.tt{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.tt th{text-align:left;padding:8px 12px;background:#f5f5f5;font-weight:600;color:#525252;border-bottom:1px solid #e5e5e5}
+.tt td{padding:8px 12px;border-bottom:1px solid #f5f5f5;color:#525252;line-height:1.5}
+.db{background:#fef3e2;border-radius:12px;padding:16px;margin:16px 0}.db h4{color:var(--w);font-size:14px;margin-bottom:6px}.db p{font-size:13px;color:#404040;line-height:1.6}
+.dbn{background:#fde8e8;border:1px solid var(--d);border-radius:12px;padding:16px;margin:16px 0}.dbn h4{color:var(--d);font-size:14px;margin-bottom:6px}.dbn p{font-size:13px;color:#404040;line-height:1.6}
+.rintro{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-bottom:16px;font-size:14px;line-height:1.6}
+@media(max-width:480px){.c{padding:16px}.cd{padding:20px}.bg{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="c">
+  <div class="hd">
+    <h1>痘痘皮肤自测诊断</h1>
+    <p>完整版 · 6 步找到你的痘痘类型与解决方案</p>
+  </div>
+  <div class="pb"><div class="pb-bar" id="pb"></div></div>
+  <div class="pbl" id="pbl">开始测试</div>
+
+  <!-- Intro -->
+  <div class="cd a" id="intro">
+    <div class="in">
+      <h2>开始自测</h2>
+      <p>回答 6 组问题，系统自动分析你的痘痘类型并给出分阶段护肤方案。全程约 5-8 分钟。</p>
+      <button class="btn btn-p" id="startBtn">开始答题</button>
+    </div>
+  </div>
+
+  <!-- Question stages -->
+  <div id="stages"></div>
+
+  <!-- Intercept banner -->
+  <div id="intercept"></div>
+
+  <!-- Loading -->
+  <div class="ld" id="loading">
+    <div class="sp"></div>
+    <p>正在分析...</p>
+    <div class="ls" id="lsteps">分析中</div>
+  </div>
+
+  <!-- Result -->
+  <div id="result"></div>
+</div>
+<script>
+// ============ TREATMENT PLANS ============
+var plans = {
+  hormonal:{
+    name:"雄激素型痘痘",desc:"雄激素波动导致皮脂分泌旺盛。常见于月经前后、青春期、30+女性。",
+    p1:{t:"控油+抗炎",do:["用壬二酸 10%-15% 局部或全脸","加烟酰胺 4%-5% 辅助控油","每天防晒（硬防晒或物理防晒霜）"],dont:["不要过度清洁","不要用手挤痘","不要在经前一周突然换护肤品"]},
+    p2:{t:"深化调节",do:["继续第一阶段","壬二酸可升级全脸使用","可加入低浓度水杨酸 0.5%-1% 在 T 区"],w:"注意观察经期前后变化，提前 3-5 天加强管理"},
+    p3:{t:"巩固维持",do:["建立长期稳定的护肤节奏","保持壬二酸+烟酰胺组合","咨询医生是否适合口服螺内酯（女性）"],dr:["自行处理 8-12 周无效","月经严重不规律 + 长痘","出现囊肿/结节型大痘"]}
+  },
+  barrier:{
+    name:"屏障受损型痘痘",desc:"角质层受损导致刺激物渗入，引发微炎症和毛囊角化异常。常见于过度清洁、刷酸不当、油类手搓按摩。",
+    p1:{t:"修护屏障（绝对优先）",do:["停用一切酸类/A醇/高浓度VC/磨砂/洗脸仪","氨基酸表活洁面","含 B5+神经酰胺+积雪草苷的修护产品"],dont:["不要用任何活性成分","不要用热水洗脸","不要做任何摩擦面部的动作","不要敷片状面膜过久"]},
+    p2:{t:"修护打底 + 温和治痘",do:["继续修护打底","加壬二酸 10% 只在白头/痘区局部点涂","加低浓度烟酰胺 3%-5%"],w:"涂壬二酸有刺痛感的话，先用修护产品打底，过 15 分钟再涂"},
+    p3:{t:"恢复期进阶",do:["保持修护+壬二酸+烟酰胺组合","屏障恢复后加入低浓度水杨酸或 A 醇"],dr:["修护 4 周后屏障未见改善","痘痘在修护期反而加重","出现大面积炎症或脓疱"]}
+  },
+  diet:{
+    name:"饮食型痘痘",desc:"高GI食物和乳制品刺激 IGF-1 分泌，导致皮脂增多和角质过度增生。常见于喝牛奶/吃甜食后 2-4 天爆痘。",
+    p1:{t:"饮食干预 + 辅助疏通",do:["停掉牛奶/奶茶/甜面包/蛋糕/乳清蛋白粉 2 周","外用壬二酸或水杨酸辅助疏通"],dont:["不要全面断食（会升高皮质醇）","不要完全不吃碳水（控制高GI食物即可）"]},
+    p2:{t:"食物挑战（找元凶）",do:["第 3 周起每 3 天加回一种食物观察反应","常见触发顺序：牛奶 → 奶茶 → 蛋糕 → 面包","找到触发物后日常避开即可"]},
+    p3:{t:"建立长期饮食模式",do:["保持低GI+低乳制品模式","偶尔吃了触发食物，提前加强护肤管理","外用低浓度水杨酸或壬二酸每周 3-4 次"],dr:["严格控制饮食 4 周后无任何改善","伴有消化系统不适"]}
+  },
+  stress:{
+    name:"压力型痘痘",desc:"皮质醇升高刺激皮脂腺活跃+炎症因子上升。常见于考试/加班/熬夜后爆痘，多为红肿炎性痘。",
+    p1:{t:"抗炎 + 控油 + 作息",do:["壬二酸 10%-15% 全脸或局部（抗炎主力）","烟酰胺 4%-5% 辅助控油","保证睡眠 ≥ 7 小时"],dont:["不要在压力期叠加太多活性成分","不要熬夜后疯狂敷面膜/刷酸补救"]},
+    p2:{t:"建立抗压护肤节奏",do:["维持壬二酸+烟酰胺","可加入绿茶提取物 EGCG","运动后及时洗脸"]},
+    p3:{t:"长期维稳",do:["壬二酸作为常备武器","保持稳定作息","学会识别压力信号，提前加强管理"],dr:["压力源消除后 8 周无改善","出现大面积炎性痘或囊肿结节"]}
+  },
+  cosmetic:{
+    name:"化妆品堵塞型",desc:"致痘成分堵塞毛囊口。常见于新换防晒/粉底/护发素/发胶后。",
+    p1:{t:"排查 + 停用 + 疏通",do:["回溯 2-4 周内新换的所有产品","停用可疑产品，换不致痘配方","水杨酸 0.5%-2% 或壬二酸局部疏通"],dont:["不要叠加更多新产品","不要用油类产品试图溶解闭口"]},
+    p2:{t:"观察确认",do:["停用后观察 2-3 周","如痘痘减少则锁定元凶","更换护发素/防晒为不致痘配方"],dr:["停用 4 周后闭口无变化"]}
+  },
+  friction:{
+    name:"摩擦型痘痘",desc:"摩擦导致角质层微损和毛囊角化异常。常见于戴口罩/侧睡/手托脸/打电话。",
+    p1:{t:"停止摩擦（核心）",do:["戴口罩每 4 小时换一次，到家立刻洗脸","侧睡换真丝枕套，养仰睡习惯","打电话用耳机或免提","手托脸→意识到就放下"],dont:["不要继续做任何摩擦面部的行为"]},
+    p2:{t:"处理已形成的痘",do:["壬二酸或水杨酸处理已有的痘","继续保持零摩擦习惯"],dr:["停止摩擦 4 周后仍持续长痘"]}
+  },
+  medication:{
+    name:"药物诱发型痘痘",desc:"某些药物（皮质类固醇/锂剂/大剂量 B12 等）可诱发或加重痤疮。",
+    p1:{t:"咨询医生 + 维稳",do:["咨询开药医生能否减量/换药","不要自行停药","最温和护肤：氨基酸洁面+B5+物理防晒"],dont:["不要自行停药或改药","不要用高浓度活性成分"]}
+  },
+  fungal:{
+    name:"真菌性毛囊炎（假痘）",desc:"马拉色菌过度繁殖导致毛囊炎症。不是普通痘痘，用祛痘产品会加重。",
+    p1:{t:"抗真菌治疗",do:["酮康唑洗剂停留面部 3-5 分钟洗掉，每周 2-3 次","联苯苄唑乳膏每晚涂","勤换枕套毛巾（60 度以上水洗）"],dont:["不要用任何祛痘产品（会加重）","不要用含油脂护肤品（真菌吃油脂）","不要用椰子油等长链脂肪酸产品"]},
+    p2:{t:"维持防复发",do:["症状消退后酮康唑洗剂改为每周 1 次","保持面部干爽，出汗及时洗掉","持续避免油性护肤品"],dr:["自行处理 2-4 周无改善（需皮肤科做真菌镜检）","反复发作"]}
+  }
+};
+
+// ============ QUESTIONS DATA ============
+// Each question group is a "Step". Steps are rendered as separate screens with title + questions.
+var steps = [];
+
+// ----- STEP 1: SAFETY SCREENING -----
+steps.push({
+  title:"安全筛查",
+  note:"这一步用于排除需要就医的特殊情况，请如实回答",
+  questions:[
+    {
+      q:"你长痘的区域痒不痒？",
+      sub:"（尤其是额头和发际线附近有没有大小均匀的红色小疙瘩+小脓点）",
+      os:[{l:"明显痒，会想去抓",v:"itchy"},{l:"偶尔痒",v:"mild"},{l:"完全不痒",v:"no"},{l:"不确定，没注意",v:"unsure"}],
+      k:"itch",s:0
+    },
+    {
+      q:"你目前是否处于以下状态？",
+      os:[{l:"没有",v:"none"},{l:"怀孕中",v:"pregnant"},{l:"哺乳期",v:"nursing"},{l:"正在备孕",v:"trying"}],
+      k:"preg",s:0
+    },
+    {
+      q:"近期是否在服用以下药物？（可多选）",
+      os:[{l:"以上都没有",v:"none"},{l:"激素类药物（皮质类固醇）",v:"steroid"},{l:"含锂药物",v:"lithium"},{l:"大剂量维生素 B12 补充剂",v:"b12"},{l:"抗惊厥药 / 抗结核药",v:"other"},{l:"不确定，正在吃处方药但搞不清名字",v:"unsure"}],
+      k:"med",s:1
+    }
+  ]
+});
+
+// ----- STEP 2: BASIC PROFILE -----
+steps.push({
+  title:"基础信息",
+  note:"帮助系统根据你的年龄、性别、肤质做更精准的判断",
+  questions:[
+    {
+      q:"你的年龄？",
+      os:[{l:"12-20 岁",v:"teen"},{l:"20-30 岁",v:"young"},{l:"30-40 岁",v:"mid"},{l:"40 岁以上",v:"senior"}],
+      k:"age",s:0
+    },
+    {
+      q:"你的性别？",
+      os:[{l:"女",v:"f"},{l:"男",v:"m"}],
+      k:"gender",s:0
+    },
+    {
+      q:"洗完脸不涂东西 30 分钟后，脸的感觉是？",
+      os:[{l:"全脸出油",v:"oil"},{l:"T 区油，两颊正常",v:"combo"},{l:"T 区油，两颊干",v:"combo_dry"},{l:"全脸紧绷/干燥",v:"dry"}],
+      k:"skin",s:0
+    }
+  ]
+});
+
+// ----- STEP 3: BARRIER QUICK CHECK (5 questions) -----
+steps.push({
+  title:"屏障状态评估",
+  note:"请根据过去 1 周的皮肤状态回答以下 5 题。选「是」越多，屏障受损越可能",
+  questions:[
+    {q:"洗完脸后，不涂东西的时候脸有紧绷感吗？",os:[{l:"是",v:"y"},{l:"否",v:"n"}],k:"bar1",s:0},
+    {q:"涂平时用的护肤品时，有刺痛感吗？",os:[{l:"是",v:"y"},{l:"否",v:"n"}],k:"bar2",s:0},
+    {q:"脸容易泛红吗？（遇热、吹风、吃辣之后）",os:[{l:"是",v:"y"},{l:"否",v:"n"}],k:"bar3",s:0},
+    {q:"最近 1 个月内用过刷酸/高浓度维C/A醇/磨砂/洗脸仪吗？",os:[{l:"是",v:"y"},{l:"否",v:"n"}],k:"bar4",s:0},
+    {q:"最近 1 个月内用过油类产品在脸上搓过或按摩过吗？（荷荷巴油、卸妆油长时间按摩、刮痧板等）",os:[{l:"是",v:"y"},{l:"否",v:"n"}],k:"bar5",s:0}
+  ]
+});
+
+// ----- STEP 4: ACNE PROFILE -----
+steps.push({
+  title:"痘痘画像",
+  note:"描述你痘痘的位置、形态、规律和历史",
+  questions:[
+    {
+      q:"你的痘痘主要长在哪里？（可多选，选最主要的）",
+      os:[{l:"额头/发际线",v:"fh"},{l:"脸颊",v:"ck"},{l:"下巴",v:"chin"},{l:"下颌线（脸侧连接脖子的区域）",v:"jw"},{l:"全脸弥散",v:"al"}],
+      k:"loc",s:1
+    },
+    {
+      q:"你的痘痘主要是什么样子的？（可多选）",
+      os:[{l:"闭口/粉刺（不红不痛，摸起来不平滑）",v:"cl"},{l:"白头/黑头（毛孔有白色或黑色角栓）",v:"wh"},{l:"红肿痘（按着痛）",v:"in"},{l:"脓包（有脓头）",v:"pu"},{l:"囊肿/结节（大痘，深部，很痛）",v:"cy"}],
+      k:"mor",s:1
+    },
+    {
+      q:"你的痘痘有什么规律？（可多选）",
+      os:[{l:"月经前后加重",v:"m"},{l:"压力大/熬夜后加重",v:"s"},{l:"吃了甜食/喝牛奶后加重",v:"d"},{l:"换季/换环境后加重",v:"se"},{l:"没有明显规律",v:"n"}],
+      k:"pat",s:1
+    },
+    {
+      q:"你长痘多久了？",
+      os:[{l:"刚长几周",v:"wk"},{l:"反复几个月",v:"mo"},{l:"断断续续好几年",v:"yr"},{l:"一直没停过",v:"al"}],
+      k:"dur",s:0
+    },
+    {
+      q:"之前用过哪些治痘的方法？（可多选）",
+      os:[{l:"没用过，第一次处理",v:"n"},{l:"水杨酸类产品",v:"bha"},{l:"过氧化苯甲酰（班赛等）",v:"bp"},{l:"阿达帕林/维A酸（处方药膏）",v:"ada"},{l:"异维A酸口服（泰尔丝等）",v:"iso"},{l:"针清/挤痘",v:"pick"},{l:"美容院/医美（红蓝光、刷酸等）",v:"med"},{l:"中药/中成药",v:"tcm"}],
+      k:"hist",s:1
+    },
+    {
+      q:"之前用的治痘方法效果如何？",
+      os:[{l:"效果不错，但停药后复发",v:"good"},{l:"有效果但太刺激了",v:"irr"},{l:"没什么用",v:"bad"},{l:"没用过，不适用",v:"none"}],
+      k:"hist_eff",s:0
+    }
+  ]
+});
+
+// ----- STEP 5: LIFESTYLE + SKINCARE -----
+steps.push({
+  title:"生活习惯与护肤排查",
+  note:"找到外源性触发因素",
+  questions:[
+    {
+      q:"你喝牛奶/吃甜食的频率是？",
+      os:[{l:"每天（包括拿铁、酸奶、奶茶、蛋糕等）",v:"dy"},{l:"每周 3-4 次",v:"of"},{l:"偶尔 / 很少",v:"oc"},{l:"不确定",v:"unsure"}],
+      k:"diet",s:0
+    },
+    {
+      q:"你觉得长痘和吃这些有关系吗？",
+      os:[{l:"有明显关系，吃了就长",v:"yes"},{l:"感觉有，但不确定",v:"maybe"},{l:"没关系，吃多吃少都一样",v:"no"}],
+      k:"diet_rel",s:0
+    },
+    {
+      q:"你平均每天睡几个小时？",
+      os:[{l:"不足 5 小时",v:"vlow"},{l:"5-6 小时",v:"low"},{l:"7-8 小时",v:"ok"},{l:"8 小时以上",v:"great"}],
+      k:"sleep",s:0
+    },
+    {
+      q:"最近一个月的压力等级？",
+      sub:"1 = 完全没压力，10 = 感觉快炸了",
+      os:[{l:"1-3（轻松）",v:"lo"},{l:"4-6（有一点压力）",v:"md"},{l:"7-8（压力比较大）",v:"hi"},{l:"9-10（感觉快炸了）",v:"vh"}],
+      k:"stress",s:0
+    },
+    {
+      q:"你现在每天护肤用哪些产品？（可多选）",
+      os:[{l:"氨基酸洁面",v:"aa"},{l:"皂基洁面",v:"soap"},{l:"磨砂/颗粒洁面",v:"scrub"},{l:"含酸精华（水杨酸/果酸/壬二酸）",v:"acid"},{l:"含 A 醇/视黄醇",v:"ret"},{l:"含维 C",v:"vc"},{l:"含烟酰胺",v:"niam"},{l:"乳液/面霜（保湿类）",v:"mois"},{l:"防晒霜",v:"ss"},{l:"卸妆油/膏（需乳化）",v:"coil"},{l:"护肤油/荷荷巴油",v:"oil"},{l:"不用任何护肤品",v:"none"}],
+      k:"routine",s:1
+    },
+    {
+      q:"你化妆吗？",
+      os:[{l:"每天化",v:"dy"},{l:"经常化（每周 3-4 次）",v:"of"},{l:"偶尔化",v:"oc"},{l:"不化妆",v:"n"}],
+      k:"makeup",s:0
+    },
+    {
+      q:"以下哪些情况符合你？（可多选）",
+      os:[{l:"每天戴口罩超过 2 小时",v:"mk"},{l:"侧睡",v:"ss"},{l:"打电话喜欢贴在脸上",v:"ph"},{l:"习惯手托脸/摸脸",v:"tf"},{l:"经常戴帽子/头盔",v:"hat"},{l:"以上都没有",v:"n"}],
+      k:"physical",s:1
+    }
+  ]
+});
+
+// ============ STATE ============
+var currentStep = -1;
+var answers = {};
+var stg = document.getElementById("stages");
+var pb = document.getElementById("pb");
+var pbl = document.getElementById("pbl");
+var loading = document.getElementById("loading");
+var lsteps = document.getElementById("lsteps");
+var intercept = document.getElementById("intercept");
+var resultDiv = document.getElementById("result");
+var barScore = 0;
+
+// ============ START ============
+document.getElementById("startBtn").onclick = function(){
+  document.getElementById("intro").classList.remove("a");
+  showStep(0);
+};
+
+// ============ RENDER STEP ============
+function showStep(idx){
+  if(idx >= steps.length){ runAnalysis(); return; }
+  currentStep = idx;
+  var step = steps[idx];
+  var html = '<div class="cd a"><h2>第 '+(idx+1)+'/'+steps.length+' 关</h2><div class="st">'+step.title+'</div>';
+  if(step.note) html += '<div class="st" style="color:#a3a3a3;font-size:12px;margin-bottom:16px">'+step.note+'</div>';
+  for(var qi=0; qi<step.questions.length; qi++){
+    var q = step.questions[qi];
+    var qid = "q_"+idx+"_"+qi;
+    html += '<div class="q"><div class="ql">'+(qi+1)+'. '+q.q+'</div>';
+    if(q.sub) html += '<div class="qsub">'+q.sub+'</div>';
+    html += '<div class="ops" id="'+qid+'">';
+    for(var oi=0; oi<q.os.length; oi++){
+      var o = q.os[oi];
+      var c = q.s ? "cb" : "rb";
+      html += '<div class="op" data-step="'+idx+'" data-qi="'+qi+'" data-v="'+o.v+'"><div class="'+c+'"></div><span>'+o.l+'</span></div>';
+    }
+    html += '</div></div>';
+  }
+  html += '<div class="bg"><button class="btn btn-p" id="nextBtn">下一步</button></div></div>';
+  
+  stg.innerHTML = html;
+  
+  // Bind op clicks
+  var allOps = stg.querySelectorAll(".op");
+  for(var i=0; i<allOps.length; i++){
+    allOps[i].onclick = function(){
+      var stepI = parseInt(this.dataset.step);
+      var qi = parseInt(this.dataset.qi);
+      var v = this.dataset.v;
+      var q = steps[stepI].questions[qi];
+      var qid = "q_"+stepI+"_"+qi;
+      var ops = document.getElementById(qid).querySelectorAll(".op");
+      if(q.s){
+        // Multi-select
+        if(!answers[stepI]) answers[stepI] = {};
+        if(!answers[stepI][qi]) answers[stepI][qi] = [];
+        // "none" clears all
+        if(v === "none" || v === "n"){
+          answers[stepI][qi] = [v];
+          ops.forEach(function(o){o.classList.remove("s");});
+          this.classList.add("s");
+          return;
+        }
+        // Remove "none" if it was selected
+        var arr = answers[stepI][qi].filter(function(x){return x!=="none" && x!=="n";});
+        var pos = arr.indexOf(v);
+        if(pos > -1){ arr.splice(pos,1); this.classList.remove("s"); }
+        else{ arr.push(v); this.classList.add("s"); }
+        answers[stepI][qi] = arr;
+      } else {
+        // Single select
+        if(!answers[stepI]) answers[stepI] = {};
+        answers[stepI][qi] = v;
+        ops.forEach(function(o){o.classList.remove("s");});
+        this.classList.add("s");
+      }
+    };
+  }
+  
+  // Update progress
+  var pct = ((idx) / steps.length) * 85;
+  if(pct < 5) pct = 5;
+  pb.style.width = pct + "%";
+  pbl.textContent = "第 "+(idx+1)+" / "+steps.length+" 关";
+  
+  // Bind next
+  document.getElementById("nextBtn").onclick = function(){ goNext(idx); };
+}
+
+function goNext(idx){
+  // Validate all questions in this step are answered
+  var step = steps[idx];
+  for(var qi=0; qi<step.questions.length; qi++){
+    var q = step.questions[qi];
+    if(q.s){
+      // Multi-select - allow empty
+      continue;
+    }
+    // Single select - must have answer
+    if(!answers[idx] || answers[idx][qi] === undefined || answers[idx][qi] === null){
+      alert("请回答第 "+(qi+1)+" 题");
+      return;
+    }
+  }
+  
+  // Check intercepts after step 0 (safety screening)
+  if(idx === 0){
+    var a = answers[0];
+    // Check fungal
+    var itch = a[0];
+    if(itch === "itchy" || itch === "mild"){
+      // Check if they also answered "yes" to itch - show fungal warning
+      showIntercept("fungal", itch);
+      return; // Don't proceed until they click "我知道了，继续"
+    }
+    // Check pregnancy
+    if(a[1] && (a[1] === "pregnant" || a[1] === "trying" || a[1] === "nursing")){
+      showIntercept("pregnancy", a[1]);
+      return;
+    }
+    // Check medication
+    if(a[2] && a[2].length){
+      var meds = a[2];
+      if(!meds.includes("none")){
+        showIntercept("medication", meds);
+        return;
+      }
+    }
+  }
+  
+  // Check 30+ sudden breakout after step 3 (acne profile)
+  if(idx === 3){
+    var basic = answers[1];
+    var age = basic ? basic[0] : "";
+    var acne = answers[3];
+    var dur = acne ? acne[3] : "";
+    if((age === "mid" || age === "senior") && (dur === "wk")){
+      showIntercept("age30");
+      return;
+    }
+  }
+  
+  showStep(idx+1);
+}
+
+// ============ INTERCEPT HANDLING ============
+var pendingNext = null;
+
+function showIntercept(type, data){
+  var html = "";
+  if(type === "fungal"){
+    html = '<div class="int s d"><h3>⚠️ 疑似真菌性毛囊炎</h3><p>你选择了「痒」，且痘痘大小均匀的话，这很可能不是普通痘痘，而是马拉色菌毛囊炎。</p><p><br><strong>不要用任何祛痘产品</strong>——祛痘产品会加重真菌繁殖。<br>建议：去皮肤科做真菌镜检确诊。确诊前可以用酮康唑洗剂每周洗 2-3 次。</p><br><button class="btn btn-p" onclick="dismissIntercept()">我知道了，继续</button></div>';
+    // Mark the user as fungal-suspected
+    if(!answers["flags"]) answers["flags"] = {};
+    answers["flags"].fungal_suspected = true;
+  } else if(type === "pregnancy"){
+    html = '<div class="int s w"><h3>⚠️ 孕期/备孕/哺乳期提示</h3><p>你当前处于特殊生理阶段，你的护肤方案中：<br>❌ 禁用维 A 类成分（A 醇、A 醛、维A酸）<br>❌ 慎用高浓度水杨酸（建议不超过 0.5%，且仅限局部）</p><p>系统会根据你的状态调整方案。</p><br><button class="btn btn-p" onclick="dismissIntercept()">我知道了，继续</button></div>';
+    if(!answers["flags"]) answers["flags"] = {};
+    answers["flags"].pregnant = true;
+  } else if(type === "medication"){
+    html = '<div class="int s w"><h3>⚠️ 可能与药物有关</h3><p>你目前在服用某些药物，痘痘可能与药物有关。<br>建议：在调整护肤方案之前，先咨询开药医生。</p><p><strong>不要自行停用药物</strong>。</p><br><button class="btn btn-p" onclick="dismissIntercept()">我知道了，继续</button></div>';
+    if(!answers["flags"]) answers["flags"] = {};
+    answers["flags"].medication = true;
+  } else if(type === "age30"){
+    html = '<div class="int s w"><h3>⚠️ 建议排查激素水平</h3><p>30 岁以后突然开始长痘，有可能是体内激素变化引起的（如多囊卵巢综合征）。建议先去妇科/内分泌科查一下激素六项。</p><p>在结果出来之前，可以先按温和修护方案处理。</p><br><button class="btn btn-p" onclick="dismissIntercept()">我知道了，继续</button></div>';
+    if(!answers["flags"]) answers["flags"] = {};
+    answers["flags"].age_sudden = true;
+  }
+  intercept.innerHTML = html;
+}
+
+function dismissIntercept(){
+  intercept.innerHTML = "";
+  // Proceed to next step
+  showStep(currentStep+1);
+}
+
+// ============ ANALYSIS ============
+function runAnalysis(){
+  stg.innerHTML = "";
+  loading.classList.add("a");
+  var stepsText = ["正在读取你的答卷...","匹配症状特征...","分析屏障状态...","计算权重...","生成方案...","优化中..."];
+  var si = 0;
+  var ti = setInterval(function(){
+    si++;
+    if(si < stepsText.length) lsteps.textContent = stepsText[si];
+  }, 600);
+  
+  setTimeout(function(){
+    clearInterval(ti);
+    loading.classList.remove("a");
+    var res = calcResult();
+    showResult(res);
+  }, 3500);
+}
+
+function calcResult(){
+  var w = {hormonal:0, barrier:0, diet:0, stress:0, cosmetic:0, friction:0};
+  
+  // Flags
+  var flags = answers["flags"] || {};
+  
+  // ===== STEP 1 (safety) =====
+  // Nothing to add to weights here
+  
+  // ===== STEP 2 (basic profile) =====
+  var basic = answers[1] || {};
+  var age = basic[0] || "";
+  var gender = basic[1] || "";
+  var skin = basic[2] || "";
+  
+  if(age === "teen"){ w.hormonal += 2; }
+  if(age === "young"){ w.stress += 1; w.diet += 1; }
+  if(age === "mid" || age === "senior"){ if(gender === "f"){ w.hormonal += 1; w.barrier += 1; } }
+  
+  // ===== STEP 3 (barrier check) =====
+  var bar = answers[2] || {};
+  barScore = 0;
+  for(var bi=0; bi<5; bi++){
+    if(bar[bi] === "y") barScore++;
+  }
+  if(barScore >= 4){ w.barrier += 100; } // Severe barrier damage overrides everything
+  else if(barScore >= 2){ w.barrier += 2; }
+  
+  // ===== STEP 4 (acne profile) =====
+  var acne = answers[3] || {};
+  var loc = acne[0] || [];
+  var mor = acne[1] || [];
+  var pat = acne[2] || [];
+  var dur = acne[3] || "";
+  var hist = acne[4] || [];
+  var histEff = acne[5] || "";
+  
+  if(loc.includes("fh")){ w.diet += 1; }
+  if(loc.includes("ck")){ w.barrier += 1; }
+  if(loc.includes("chin") || loc.includes("jw")){ w.hormonal += 2; }
+  
+  if(mor.includes("cy")){ w.hormonal += 1; }
+  
+  if(pat.includes("m")){ w.hormonal += 2; }
+  if(pat.includes("s")){ w.stress += 2; }
+  if(pat.includes("d")){ w.diet += 2; }
+  if(pat.includes("se")){ w.barrier += 1; }
+  
+  // Treatment history: if ada/iso was too irritating, barrier weight up
+  if(hist.includes("ada") || hist.includes("iso")){
+    if(histEff === "irr"){ w.barrier += 1; }
+  }
+  
+  // ===== STEP 5 (lifestyle) =====
+  var life = answers[4] || {};
+  var dietFreq = life[0] || "";
+  var dietRel = life[1] || "";
+  var sleep = life[2] || "";
+  var stressLvl = life[3] || "";
+  var routine = life[4] || [];
+  var makeup = life[5] || "";
+  var physical = life[6] || [];
+  
+  if((dietFreq === "dy" || dietFreq === "of") && (dietRel === "yes" || dietRel === "maybe")){
+    w.diet += 2;
+  } else if(dietFreq === "dy" || dietFreq === "of"){
+    w.diet += 1;
+  }
+  
+  if(sleep === "vlow" || sleep === "low"){ w.stress += 1; }
+  if(stressLvl === "hi" || stressLvl === "vh"){ w.stress += 2; }
+  
+  if(routine.includes("oil") || routine.includes("coil")){
+    w.barrier += 1;
+    w.cosmetic += 1;
+  }
+  if(routine.includes("soap") || routine.includes("scrub")){
+    if(barScore >= 2) w.barrier += 1;
+  }
+  if(makeup === "dy" || makeup === "of"){
+    if(!routine.includes("coil")){ w.cosmetic += 1; } // Wears makeup but no oil cleanser
+  }
+  
+  if(physical.length && !physical.includes("n")){
+    var frictionCount = physical.length;
+    w.friction += Math.floor(frictionCount / 2) + (frictionCount >= 2 ? 1 : 0);
+  }
+  
+  // Override: if medication flag, add medication to top
+  if(flags.medication){
+    w.medication = 10;
+  }
+  
+  // Sort
+  var allKeys = Object.keys(w);
+  allKeys.sort(function(a,b){ return w[b] - w[a]; });
+  var top = allKeys.filter(function(k){ return w[k] > 0; });
+  if(top.length === 0) top = ["hormonal"];
+  
+  // Generate summary
+  var summary = generateSummary(top, w, flags, barScore);
+  
+  return {
+    primary: top[0],
+    secondary: top.slice(1,3),
+    weights: w,
+    flags: flags,
+    barScore: barScore,
+    summary: summary,
+    dur: dur,
+    age: age
+  };
+}
+
+function generateSummary(top, w, flags, barScore){
+  if(barScore >= 4) return "你的皮肤屏障目前处于严重受损状态，需要优先修复。所有其他问题排在后面。";
+  if(flags.medication) return "你的痘痘可能与正在服用的药物有关，建议先咨询医生。";
+  var name = plans[top[0]];
+  if(!name) return "综合分析你的情况，以下是推荐的护肤方案。";
+  if(barScore >= 2) return "你的皮肤屏障存在轻度受损，方案会同时兼顾修护和治痘。主要方向：" + name.name;
+  return "根据你的回答，最主要的问题方向是：" + name.name;
+}
+
+// ============ RESULT DISPLAY ============
+function showResult(res){
+  pb.style.width = "100%";
+  pbl.textContent = "诊断完成";
+  
+  var primaryPlan = plans[res.primary];
+  if(!primaryPlan) primaryPlan = plans.barrier;
+  
+  var tone = "";
+  if(res.dur === "wk") tone = "你的痘痘可能是由单一因素触发的，调整 2-4 周应该能看到明显变化。";
+  else if(res.dur === "mo") tone = "反复长痘通常不是一个原因造成的，我们按优先级逐一排查。";
+  else if(res.dur === "yr" || res.dur === "al") tone = "你的皮肤状况是长期积累的结果，改善需要耐心，一步一步来。";
+  else tone = "以下是根据你的回答生成的分阶段方案。";
+  
+  var html = '<div class="rsum"><h2>诊断结论</h2><div>';
+  html += '<span class="ct p">🎯 '+primaryPlan.name+'</span>';
+  res.secondary.forEach(function(s){
+    if(plans[s]) html += '<span class="ct">'+plans[s].name+'</span>';
+  });
+  html += '</div><div class="rdesc">'+res.summary+'</div></div>';
+  
+  // Intro summary paragraph
+  html += '<div class="rintro">'+tone+'</div>';
+  
+  // Render phases
+  if(primaryPlan.p1) html += renderPhase("🥇 第一阶段", primaryPlan.p1.t, primaryPlan.p1.do, primaryPlan.p1.dont, null, "核心处理（第 1-2 周）");
+  if(primaryPlan.p2) html += renderPhase("🥈 第二阶段", primaryPlan.p2.t, primaryPlan.p2.do, null, primaryPlan.p2.w, "深化调整（第 3-5 周）");
+  if(primaryPlan.p3) html += renderPhase("🥉 第三阶段", primaryPlan.p3.t, primaryPlan.p3.do, null, null, "巩固维持（第 6-12 周）");
+  
+  // If secondary plan exists and has different phases, show helpful tips
+  if(res.secondary.length > 0){
+    var sec = res.secondary[0];
+    if(sec && plans[sec] && sec !== res.primary){
+      html += '<div class="pw" style="padding:12px;border-radius:8px;font-size:13px;margin-bottom:12px">💡 辅助因素：'+plans[sec].name+'。在主要方案执行期间，可留意 '+plans[sec].desc.slice(0,30)+'…</div>';
+    }
+  }
+  
+  // Doctor visit indicators
+  var drItems = [];
+  if(primaryPlan.p3 && primaryPlan.p3.dr){
+    primaryPlan.p3.dr.forEach(function(d){ drItems.push(d); });
+  }
+  if(primaryPlan.p2 && primaryPlan.p2.dr){
+    primaryPlan.p2.dr.forEach(function(d){ drItems.push(d); });
+  }
+  if(drItems.length > 0){
+    html += '<div class="db"><h4>🆘 什么时候该看医生</h4><p>'+drItems.join("<br>")+'</p></div>';
+  }
+  
+  // Pregnancy warning if applicable
+  if(flags.pregnant){
+    html += '<div class="dbn"><h4>⚠️ 孕期/哺乳期特别提示</h4><p>以上方案中：<br>❌ 禁用维 A 类成分（A醇/A醛/维A酸）<br>❌ 慎用高浓度水杨酸（建议不超过 0.5%）<br>请在使用任何产品前咨询产科医生。</p></div>';
+  }
+  
+  // Expectation timeline
+  html += '<div class="ptl"><div class="ttl">📅 预期变化时间线</div>';
+  html += '<table class="tt"><tr><th>时间</th><th>能看到的变化</th><th>还看不到的变化</th></tr>';
+  html += '<tr><td>第 1-2 周</td><td>不再长新的（如果做对了的话）</td><td>旧痘还没消，别急</td></tr>';
+  html += '<tr><td>第 3-4 周</td><td>旧痘开始消退，新痘明显减少</td><td>毛孔/痘坑/痘印改善还需要时间</td></tr>';
+  html += '<tr><td>第 8-12 周</td><td>整体改善明显，出油减少</td><td>逆转长年问题需要更多周期</td></tr>';
+  html += '</table></div>';
+  
+  // About acne marks
+  html += '<div class="pw" style="padding:12px;border-radius:8px;font-size:13px;margin-bottom:16px">🌟 关于痘印：长痘阶段控制住后，痘印（红色/褐色）会在 4-8 周内自行代谢一部分。加速建议：做好防晒 + 壬二酸（红印）/ 烟酰胺（褐印）持续使用。深层痘坑需要医美手段，护肤品改善有限。</div>';
+  
+  // Restart button
+  html += '<button class="btn btn-p" style="margin-top:16px;width:100%" onclick="location.reload()">🔄 重新测试</button>';
+  
+  resultDiv.innerHTML = html;
+  resultDiv.style.display = "block";
+}
+
+function renderPhase(label, title, doList, dontList, warn, subtitle){
+  var h = '<div class="pc"><div class="pl">'+label+'</div><div class="pt">'+title+'</div>';
+  if(subtitle) h += '<div class="st" style="margin-bottom:8px">'+subtitle+'</div>';
+  if(doList && doList.length) doList.forEach(function(d){ h += '<div class="pd">✅ '+d+'</div>'; });
+  if(dontList && dontList.length) dontList.forEach(function(d){ h += '<div class="px">❌ '+d+'</div>'; });
+  if(warn) h += '<div class="pw">⚠️ '+warn+'</div>';
+  h += '</div>';
+  return h;
+}
+</script>
+</body>
+</html>
+
