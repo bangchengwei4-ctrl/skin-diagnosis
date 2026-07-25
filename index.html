@@ -188,7 +188,7 @@ steps.push({
     },
     {
       q:"洗完脸不涂东西 30 分钟后，脸的感觉是？",
-      os:[{l:"全脸出油",v:"oil"},{l:"T 区油，两颊正常",v:"combo"},{l:"T 区油，两颊干",v:"combo_dry"},{l:"全脸紧绷/干燥",v:"dry"}],
+      os:[{l:"全脸出油",v:"oil"},{l:"T 区油，两颊正常",v:"combo"},{l:"T 区油，两颊干",v:"combo_dry"},{l:"中性（不油不干）",v:"normal"},{l:"全脸紧绷/干燥",v:"dry"}],
       k:"skin",s:0
     }
   ]
@@ -234,7 +234,7 @@ steps.push({
     },
     {
       q:"之前用过哪些治痘的方法？（可多选）",
-      os:[{l:"没用过，第一次处理",v:"n"},{l:"水杨酸类产品",v:"bha"},{l:"过氧化苯甲酰（班赛等）",v:"bp"},{l:"阿达帕林/维A酸（处方药膏）",v:"ada"},{l:"异维A酸口服（泰尔丝等）",v:"iso"},{l:"针清/挤痘",v:"pick"},{l:"美容院/医美（红蓝光、刷酸等）",v:"med"},{l:"中药/中成药",v:"tcm"}],
+      os:[{l:"没用过，第一次处理",v:"n"},{l:"水杨酸类产品",v:"bha"},{l:"过氧化苯甲酰（班赛等）",v:"bp"},{l:"阿达帕林/维A酸（处方药膏）",v:"ada"},{l:"异维A酸口服（泰尔丝等）",v:"iso"},{l:"针清/挤痘",v:"pick"},{l:"美容院/医美（红蓝光、刷酸等）",v:"med"},{l:"中药/中成药",v:"tcm"},{l:"医美刷酸（果酸换肤等）",v:"peel"}],
       k:"hist",s:1
     },
     {
@@ -273,7 +273,7 @@ steps.push({
     },
     {
       q:"你现在每天护肤用哪些产品？（可多选）",
-      os:[{l:"氨基酸洁面",v:"aa"},{l:"皂基洁面",v:"soap"},{l:"磨砂/颗粒洁面",v:"scrub"},{l:"含酸精华（水杨酸/果酸/壬二酸）",v:"acid"},{l:"含 A 醇/视黄醇",v:"ret"},{l:"含维 C",v:"vc"},{l:"含烟酰胺",v:"niam"},{l:"乳液/面霜（保湿类）",v:"mois"},{l:"防晒霜",v:"ss"},{l:"卸妆油/膏（需乳化）",v:"coil"},{l:"护肤油/荷荷巴油",v:"oil"},{l:"不用任何护肤品",v:"none"}],
+      os:[{l:"氨基酸洁面",v:"aa"},{l:"皂基洁面",v:"soap"},{l:"磨砂/颗粒洁面",v:"scrub"},{l:"含酸精华（水杨酸/果酸/壬二酸）",v:"acid"},{l:"含 A 醇/视黄醇",v:"ret"},{l:"含维 C",v:"vc"},{l:"含烟酰胺",v:"niam"},{l:"乳液/面霜（保湿类）",v:"mois"},{l:"防晒霜",v:"ss"},{l:"卸妆油/膏（需乳化）",v:"coil"},{l:"卸妆水/卸妆湿巾",v:"micellar"},{l:"护肤油/荷荷巴油",v:"oil"},{l:"不用任何护肤品",v:"none"}],
       k:"routine",s:1
     },
     {
@@ -399,7 +399,7 @@ function goNext(idx){
     var a = answers[0];
     // Check fungal
     var itch = a[0];
-    if(itch === "itchy" || itch === "mild"){
+    if(itch === "itchy"){
       // Check if they also answered "yes" to itch - show fungal warning
       showIntercept("fungal", itch);
       return; // Don't proceed until they click "我知道了，继续"
@@ -658,7 +658,7 @@ function showResult(res){
   }
   
   // Pregnancy warning if applicable
-  if(flags.pregnant){
+  if(res.flags.pregnant){
     html += '<div class="dbn"><h4>⚠️ 孕期/哺乳期特别提示</h4><p>以上方案中：<br>❌ 禁用维 A 类成分（A醇/A醛/维A酸）<br>❌ 慎用高浓度水杨酸（建议不超过 0.5%）<br>请在使用任何产品前咨询产科医生。</p></div>';
   }
   
