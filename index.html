@@ -95,7 +95,17 @@ body{font-family:-apple-system,PingFang SC,Noto Sans SC,Microsoft YaHei,sans-ser
   <!-- Result -->
   <div id="result"></div>
 </div>
-<script>
+<script>window.onerror = function(msg, url, line, col, err) {
+  var e = document.getElementById("errorDisplay");
+  if(!e) {
+    e = document.createElement("div");
+    e.id = "errorDisplay";
+    e.style.cssText = "position:fixed;bottom:0;left:0;right:0;background:#c0392b;color:#fff;padding:16px;font-size:13px;z-index:9999;max-height:50vh;overflow:auto";
+    document.body.appendChild(e);
+  }
+  e.innerHTML = "<b>JS Error:</b> " + msg + "<br><small>" + url + ":" + line + ":" + col + "</small><br><pre style='font-size:11px;margin-top:8px;white-space:pre-wrap'>" + (err ? err.stack : "") + "</pre>";
+  return false;
+};
 // ============ TREATMENT PLANS ============
 var plans = {
   hormonal:{
